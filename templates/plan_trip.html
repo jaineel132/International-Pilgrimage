@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="trip-planning-section">
+        <h1 class="text-center mb-4">Plan Your Pilgrimage Trip</h1>
+        <p class="text-center mb-4">Fill out the form below to plan your sacred journey. We'll help you organize everything from accommodations to transportation.</p>
+        
+        <form method="POST" action="{{ url_for('main.plan_trip') }}" class="needs-validation" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Pilgrimage Selection -->
+            <div class="mb-4">
+                {{ form.pilgrimage.label(class="form-label fw-bold") }}
+                {{ form.pilgrimage(class="form-select form-control-lg") }}
+                <div class="invalid-feedback">Please select a pilgrimage.</div>
+            </div>
+
+            <!-- Date Selection -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    {{ form.start_date.label(class="form-label fw-bold") }}
+                    {{ form.start_date(class="form-control form-control-lg", type="date") }}
+                    <div class="invalid-feedback">Please select a start date.</div>
+                </div>
+                <div class="col-md-6">
+                    {{ form.end_date.label(class="form-label fw-bold") }}
+                    {{ form.end_date(class="form-control form-control-lg", type="date") }}
+                    <div class="invalid-feedback">Please select an end date.</div>
+                </div>
+            </div>
+
+            <!-- Number of Travelers -->
+            <div class="mb-4">
+                {{ form.num_travelers.label(class="form-label fw-bold") }}
+                {{ form.num_travelers(class="form-control form-control-lg", type="number", min="1") }}
+                <div class="invalid-feedback">Please enter the number of travelers.</div>
+            </div>
+
+            <!-- Accommodation Type -->
+            <div class="mb-4">
+                {{ form.accommodation_type.label(class="form-label fw-bold") }}
+                {{ form.accommodation_type(class="form-select form-control-lg") }}
+                <div class="invalid-feedback">Please select an accommodation type.</div>
+            </div>
+
+            <!-- Transportation -->
+            <div class="mb-4">
+                {{ form.transportation.label(class="form-label fw-bold") }}
+                {{ form.transportation(class="form-select form-control-lg") }}
+                <div class="invalid-feedback">Please select a transportation option.</div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="mb-4">
+                {{ form.additional_notes.label(class="form-label fw-bold") }}
+                {{ form.additional_notes(class="form-control form-control-lg", rows="4", placeholder="Any special requests or notes?") }}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                {{ form.submit(class="btn btn-primary btn-lg px-5") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
