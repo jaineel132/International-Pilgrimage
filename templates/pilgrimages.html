@@ -16,7 +16,7 @@
         <div class="col">
             <div class="card h-100 shadow-sm">
                 <!-- Pilgrimage Image -->
-                <img src="{{ pilgrimage.image_url or url_for('static', filename='/static/images/placeholder.jpg') }}" class="card-img-top" alt="{{ pilgrimage.name }}">
+                <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" class="card-img-top" alt="{{ pilgrimage.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ pilgrimage.name }}</h5>
                     <p class="card-text text-muted">{{ pilgrimage.location }}</p>
