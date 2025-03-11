@@ -65,6 +65,7 @@ def dashboard():
 @main.route('/plan_trip', methods=['GET', 'POST'])
 @login_required
 def plan_trip():
+    #pilgrimage = Pilgrimage.query.get_or_404(pilgrimage)
     form = TripPlanningForm()
     form.pilgrimage.choices = [(p.id, p.name) for p in Pilgrimage.query.all()]
     

@@ -21,7 +21,6 @@ def create_app(config_class=Config):
         return send_from_directory('static', filename)
 
     with app.app_context():
-        
         db.create_all()
 
         @login_manager.user_loader

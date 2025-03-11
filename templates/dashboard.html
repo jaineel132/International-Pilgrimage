@@ -4,19 +4,20 @@
 <div class="container my-5">
     <h1 class="display-4 mb-4">Your Dashboard</h1>
 
-    <h2 class="mb-4">Your Bookings</h2>
-    {% if bookings %}
+    <h2 class="mb-4">Your Bookings and Trip Plans</h2>
+    {% if bookings or trip_plans %}
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Pilgrimage</th>
-                    <th scope="col">Travel Date</th>
-                    <th scope="col">Special Requirements</th>
-                    <th scope="col">Booked On (IST)</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Details</th>
+                    <th scope="col">Created On (IST)</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Display Bookings -->
                 {% for booking in bookings %}
                 <tr>
                     <td><a href="{{ url_for('main.pilgrimage', id=booking.pilgrimage.id) }}" class="text-decoration-none">{{ booking.pilgrimage.name }}</a></td>
@@ -25,12 +26,22 @@
                     <td class="booking-time">{{ booking.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
                 </tr>
                 {% endfor %}
+
+                <!-- Display Trip Plans -->
+                {% for trip_plan in trip_plans %}
+                <tr>
+                    <td><a href="{{ url_for('main.pilgrimage', id=trip_plan.pilgrimage.id) }}" class="text-decoration-none">{{ trip_plan.pilgrimage.name }}</a></td>
+                    <td>{{ trip_plan.start_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ trip_plan.additional_notes or 'None' }}</td>
+                    <td class="booking-time">{{ trip_plan.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
     <div class="alert alert-info" role="alert">
-        You haven't made any bookings yet. <a href="{{ url_for('main.pilgrimages') }}" class="alert-link">Explore pilgrimages</a> to get started!
+        You haven't made any bookings or trip plans yet. <a href="{{ url_for('main.pilgrimages') }}" class="alert-link">Explore pilgrimages</a> to get started!
     </div>
     {% endif %}
 </div>
