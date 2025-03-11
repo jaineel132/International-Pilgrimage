@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center mb-4">Explore Pilgrimages</h1>
+
+<div class="mb-4">
+    <input type="text" id="search" class="form-control" placeholder="Search pilgrimages...">
+</div>
+
+<div id="pilgrimages-container" class="row row-cols-1 row-cols-md-3 g-4">
+    {% for pilgrimage in pilgrimages.items %}
+    <div class="col">
+        <div class="card h-100">
+            <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" class="card-img-top" alt="{{ pilgrimage.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ pilgrimage.name }}</h5>
+                <p class="card-text">{{ pilgrimage.location }}</p>
+                <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<nav aria-label="Pilgrimage pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% for page in pilgrimages.iter_pages() %}
+            {% if page %}
+                {% if page != pilgrimages.page %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('main.pilgrimages', page=page) }}">{{ page }}</a></li>
+                {% else %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ page }}</span></li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search');
+        const pilgrimagesContainer = document.getElementById('pilgrimages-container');
+
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value;
+            if (query.length > 2) {
+                try {
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const results = await response.json();
+                    updatePilgrimages(results);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            } else if (query.length === 0) {
+                location.reload();
+            }
+        });
+
+        function updatePilgrimages(pilgrimages) {
+            pilgrimagesContainer.innerHTML = '';
+            if (pilgrimages.length === 0) {
+                pilgrimagesContainer.innerHTML = '<p class="text-center w-100">No pilgrimages found.</p>';
+                return;
+            }
+            pilgrimages.forEach(pilgrimage => {
+                const card = document.createElement('div');
+                card.className = 'col';
+                card.innerHTML = `
+                    <div class="card h-100">
+                        <img src="${pilgrimage.image_url || '/static/images/placeholder.jpg'}" class="card-img-top" alt="${pilgrimage.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${pilgrimage.name}</h5>
+                            <p class="card-text">${pilgrimage.location}</p>
+                            <a href="/pilgrimage/${pilgrimage.id}" class="btn btn-primary">Learn More</a>
+                        </div>
+                    </div>
+                `;
+                pilgrimagesContainer.appendChild(card);
+            });
+        }
+    });
+</script>
+{% endblock %}
+

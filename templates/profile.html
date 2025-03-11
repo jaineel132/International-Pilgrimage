@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Profile Information</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('main.profile') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control") }}
+                            {% for error in form.username.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control") }}
+                            {% for error in form.email.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.bio.label(class="form-label") }}
+                            {{ form.bio(class="form-control", rows=4) }}
+                            {% for error in form.bio.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.preferences.label(class="form-label") }}
+                            {{ form.preferences(class="form-select") }}
+                            {% for error in form.preferences.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Your Reviews</h2>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                    <div class="list-group">
+                        {% for review in reviews %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    <a href="{{ url_for('main.pilgrimage', id=review.pilgrimage.id) }}">{{ review.pilgrimage.name }}</a>
+                                </h5>
+                                <small>{{ review.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <div class="mb-1">
+                                Rating: 
+                                {% for i in range(review.rating) %}
+                                <span class="text-warning">★</span>
+                                {% endfor %}
+                                {% for i in range(5 - review.rating) %}
+                                <span class="text-muted">★</span>
+                                {% endfor %}
+                            </div>
+                            <p class="mb-1">{{ review.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p>You haven't written any reviews yet.</p>
+                    <a href="{{ url_for('main.pilgrimages') }}" class="btn btn-primary">Explore Pilgrimages</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

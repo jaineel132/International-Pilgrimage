@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Your Dashboard</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total Bookings</h5>
+                <p class="card-text display-4">{{ bookings|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Trip Plans</h5>
+                <p class="card-text display-4">{{ trip_plans|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Reviews</h5>
+                <p class="card-text display-4">{{ current_user.reviews.count() }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0">Your Bookings</h2>
+                <a href="{{ url_for('main.pilgrimages') }}" class="btn btn-sm btn-primary">Book More</a>
+            </div>
+            <div class="card-body">
+                {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Pilgrimage</th>
+                                <th>Travel Date</th>
+                                <th>Special Requirements</th>
+                                <th>Booked On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td><a href="{{ url_for('main.pilgrimage', id=booking.pilgrimage.id) }}">{{ booking.pilgrimage.name }}</a></td>
+                                <td>{{ booking.travel_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ booking.special_requirements or 'None' }}</td>
+                                <td>{{ booking.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>You haven't made any bookings yet.</p>
+                <a href="{{ url_for('main.pilgrimages') }}" class="btn btn-primary">Explore Pilgrimages</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h5 mb-0">Your Trip Plans</h2>
+                <a href="{{ url_for('main.plan_trip') }}" class="btn btn-sm btn-success">Plan New Trip</a>
+            </div>
+            <div class="card-body">
+                {% if trip_plans %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Pilgrimage</th>
+                                <th>Dates</th>
+                                <th>Travelers</th>
+                                <th>Accommodation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plan in trip_plans %}
+                            <tr>
+                                <td><a href="{{ url_for('main.pilgrimage', id=plan.pilgrimage.id) }}">{{ plan.pilgrimage.name }}</a></td>
+                                <td>{{ plan.start_date.strftime('%Y-%m-%d') }} to {{ plan.end_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ plan.num_travelers }}</td>
+                                <td>{{ plan.accommodation_type|capitalize }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>You haven't created any trip plans yet.</p>
+                <a href="{{ url_for('main.plan_trip') }}" class="btn btn-success">Plan a Trip</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Upcoming Trips or Bookings</h2>
+    </div>
+    <div class="card-body">
+        {% set has_upcoming = false %}
+        {% for booking in bookings %}
+            {% if booking.travel_date > now %}
+                {% set has_upcoming = true %}
+                <div class="alert alert-info">
+                    <strong>{{ booking.pilgrimage.name }}</strong> - {{ booking.travel_date.strftime('%Y-%m-%d') }}
+                    <p>{{ (booking.travel_date - now).days }} days remaining</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+        {% if not has_upcoming %}
+        <p>You don't have any upcoming Trips or Bookings.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

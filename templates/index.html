@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron text-center">
+    <h1 class="display-4">Welcome to International Pilgrimage Planner </h1>
+    <p class="lead">Discover and plan your pilgrimage journeys with us.</p>
+    <hr class="my-4">
+    <p>Explore International Pilgrimage.</p>
+    <div class="mt-4">
+        <a class="btn btn-primary btn-lg me-2" href="{{ url_for('main.pilgrimages') }}" role="button">Explore Pilgrimages</a>
+        {% if current_user.is_authenticated %}
+        <a class="btn btn-success btn-lg" href="{{ url_for('main.plan_trip') }}" role="button">Plan Your Trip</a>
+        {% else %}
+        <a class="btn btn-outline-primary btn-lg" href="{{ url_for('auth.register') }}" role="button">Sign Up</a>
+        {% endif %}
+    </div>
+</div>
+
+<h2 class="text-center mb-4">Featured Pilgrimages</h2>
+
+<div class="row">
+    {% for pilgrimage in featured_pilgrimages %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" class="card-img-top" alt="{{ pilgrimage.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ pilgrimage.name }}</h5>
+                <p class="card-text">{{ pilgrimage.location }}</p>
+                <div class="mb-3">
+                    {% for i in range(pilgrimage.average_rating|int) %}
+                    <span class="text-warning">★</span>
+                    {% endfor %}
+                    {% for i in range(5 - pilgrimage.average_rating|int) %}
+                    <span class="text-muted">★</span>
+                    {% endfor %}
+                    <span class="text-muted">({{ pilgrimage.reviews.count() }})</span>
+                </div>
+                <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h3>Why Choose Our Site ?</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Helps With Stressful Planning</li>
+                    <li class="list-group-item">Detailed information and traveler reviews</li>
+                    <li class="list-group-item">Personalized trip planning</li>
+                    <li class="list-group-item">Community of like-minded pilgrims</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h3>How It Works</h3>
+                <ol class="list-group list-group-numbered">
+                    <li class="list-group-item">Browse our collection of pilgrimages</li>
+                    <li class="list-group-item">Read reviews from fellow travelers</li>
+                    <li class="list-group-item">Book your pilgrimage or create a detailed trip plan</li>
+                    <li class="list-group-item">Embark on your Amazing Trip</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

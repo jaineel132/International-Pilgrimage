@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Plan Your Pilgrimage Trip</h1>
+    <form method="POST" action="{{ url_for('main.plan_trip') }}">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.pilgrimage.label(class="form-label") }}
+            {{ form.pilgrimage(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.start_date.label(class="form-label") }}
+            {{ form.start_date(class="form-control", type="date") }}
+        </div>
+        <div class="mb-3">
+            {{ form.end_date.label(class="form-label") }}
+            {{ form.end_date(class="form-control", type="date") }}
+        </div>
+        <div class="mb-3">
+            {{ form.num_travelers.label(class="form-label") }}
+            {{ form.num_travelers(class="form-control", type="number") }}
+        </div>
+        <div class="mb-3">
+            {{ form.accommodation_type.label(class="form-label") }}
+            {{ form.accommodation_type(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.transportation.label(class="form-label") }}
+            {{ form.transportation(class="form-select") }}
+        </div>
+        <div class="mb-3">
+            {{ form.additional_notes.label(class="form-label") }}
+            {{ form.additional_notes(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+{% endblock %}
+
