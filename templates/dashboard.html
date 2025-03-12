@@ -2,46 +2,65 @@
 
 {% block content %}
 <div class="container my-5">
-    <h1 class="display-4 mb-4">Your Dashboard</h1>
+    <h1 class="display-4 mb-4 text-center text-primary">Your Dashboard</h1>
 
-    <h2 class="mb-4">Your Bookings and Trip Plans</h2>
+    <h2 class="mb-4 text-secondary">Your Bookings and Trip Plans</h2>
     {% if bookings or trip_plans %}
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="thead-dark">
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover border">
+            <thead >
                 <tr>
                     <th scope="col">Pilgrimage</th>
                     <th scope="col">Date</th>
                     <th scope="col">Details</th>
-                    <th scope="col">Created On (IST)</th>
+                    <th scope="col">Created On</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Display Bookings -->
                 {% for booking in bookings %}
-                <tr>
-                    <td><a href="{{ url_for('main.pilgrimage', id=booking.pilgrimage.id) }}" class="text-decoration-none">{{ booking.pilgrimage.name }}</a></td>
+                <tr class="animate__animated animate__fadeIn">
+                    <td><a href="{{ url_for('main.pilgrimage', id=booking.pilgrimage.id) }}" class="text-decoration-none text-primary fw-bold">{{ booking.pilgrimage.name }}</a></td>
                     <td>{{ booking.travel_date.strftime('%Y-%m-%d') }}</td>
                     <td>{{ booking.special_requirements or 'None' }}</td>
                     <td class="booking-time">{{ booking.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        
+                        <button 
+                            class="btn btn-sm btn-outline-danger action-btn delete-btn" 
+                            data-id="{{ booking.id }}" 
+                            data-type="booking">
+                            Delete
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
 
                 <!-- Display Trip Plans -->
                 {% for trip_plan in trip_plans %}
-                <tr>
-                    <td><a href="{{ url_for('main.pilgrimage', id=trip_plan.pilgrimage.id) }}" class="text-decoration-none">{{ trip_plan.pilgrimage.name }}</a></td>
+                <tr class="animate__animated animate__fadeIn">
+                    <td><a href="{{ url_for('main.pilgrimage', id=trip_plan.pilgrimage.id) }}" class="text-decoration-none text-primary fw-bold">{{ trip_plan.pilgrimage.name }}</a></td>
                     <td>{{ trip_plan.start_date.strftime('%Y-%m-%d') }}</td>
                     <td>{{ trip_plan.additional_notes or 'None' }}</td>
                     <td class="booking-time">{{ trip_plan.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        
+                        <button 
+                            class="btn btn-sm btn-outline-danger action-btn delete-btn" 
+                            data-id="{{ trip_plan.id }}" 
+                            data-type="trip_plan">
+                            Delete
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-    <div class="alert alert-info" role="alert">
-        You haven't made any bookings or trip plans yet. <a href="{{ url_for('main.pilgrimages') }}" class="alert-link">Explore pilgrimages</a> to get started!
+    <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
+        <span>You haven't made any bookings or trip plans yet. <a href="{{ url_for('main.pilgrimages') }}" class="alert-link fw-bold">Explore pilgrimages</a> to get started!</span>
     </div>
     {% endif %}
 </div>
@@ -62,3 +81,4 @@
     });
 </script>
 {% endblock %}
+

@@ -1,27 +1,33 @@
 {% extends "base.html" %}
 
+
 {% block content %}
-<div class="jumbotron text-center bg-primary text-white py-5">
+<!-- Hero Section -->
+<div class="jumbotron">
     <div class="container">
         <h1 class="display-4 animate__animated animate__fadeIn">Welcome to Sacred Journeys Explorer</h1>
         <p class="lead animate__animated animate__fadeIn animate__delay-1s">Discover and plan your spiritual pilgrimage with us.</p>
         <hr class="my-4 bg-light">
         <p class="animate__animated animate__fadeIn animate__delay-2s">Explore our curated selection of pilgrimages and embark on a journey of a lifetime.</p>
-        <a class="btn btn-light btn-lg animate__animated animate__fadeIn animate__delay-3s" href="{{ url_for('main.pilgrimages') }}" role="button">Explore Pilgrimages</a>
+        <a class="btn btn-lg animate__animated animate__fadeIn animate__delay-3s" href="{{ url_for('main.pilgrimages') }}" role="button">Explore Pilgrimages</a>
     </div>
 </div>
 
-<div class="container my-5">
+<!-- Featured Pilgrimages Section -->
+<div class="container my-5 featured-pilgrimages">
     <h2 class="text-center mb-4 animate__animated animate__fadeIn">Featured Pilgrimages</h2>
     <div class="row">
         {% for pilgrimage in featured_pilgrimages %}
         <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm animate__animated animate__fadeInUp">
+            <div class="card h-100 position-relative">
                 <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" class="card-img-top" alt="{{ pilgrimage.name }}">
+                <div class="card-img-overlay d-flex align-items-end justify-content-center">
+                    <p class="text-white text-center m-0">{{ pilgrimage.tagline }}</p>
+                </div>
                 <div class="card-body">
                     <h5 class="card-title">{{ pilgrimage.name }}</h5>
                     <p class="card-text text-muted">{{ pilgrimage.location }}</p>
-                    <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn btn-primary">Learn More</a>
+                    <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn">Learn More</a>
                 </div>
             </div>
         </div>

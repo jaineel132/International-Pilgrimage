@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Search Functionality
     const searchInput = document.getElementById('search');
     const pilgrimagesContainer = document.getElementById('pilgrimages-container'); // Corrected ID
 
@@ -57,4 +58,43 @@ document.addEventListener('DOMContentLoaded', () => {
             pilgrimagesContainer.appendChild(card);
         });
     }
+
+    // Delete Functionality
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', async (event) => {
+            const itemId = event.target.dataset.id; // Get the item ID
+            const itemType = event.target.dataset.type; // Get the item type
+
+            // Confirm deletion
+            const confirmDelete = confirm(`Are you sure you want to delete this ${itemType}?`);
+            if (!confirmDelete) return;
+
+            try {
+                // Send DELETE request to the backend
+                const response = await fetch(`/delete/${itemType}/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Remove the row from the DOM with animation
+                    const row = event.target.closest('tr');
+                    row.classList.add('animate__animated', 'animate__fadeOut');
+                    setTimeout(() => row.remove(), 500); // Wait for animation to finish
+                    alert(result.message); // Show success message
+                } else {
+                    alert(`Error: ${result.message}`); // Show error message
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                alert('An unexpected error occurred.');
+            }
+        });
+    });
 });

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, abort, render_template, request, jsonify, flash, redirect, url_for
 from flask_login import login_required, current_user
 from models import Pilgrimage, Booking, TripPlan
 from forms import BookingForm, TripPlanningForm
@@ -86,6 +86,26 @@ def plan_trip():
         return redirect(url_for('main.dashboard'))
     
     return render_template('plan_trip.html', form=form)
+
+
+@main.route('/delete/<string:item_type>/<int:item_id>', methods=['DELETE'])
+def delete_item(item_type, item_id):
+    if item_type == 'booking':
+        item = Booking.query.get_or_404(item_id)
+    elif item_type == 'trip_plan':
+        item = TripPlan.query.get_or_404(item_id)
+    else:
+        abort(400, description="Invalid item type")
+
+    try:
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'{item_type.capitalize()} deleted successfully.'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 
 print("Routes have been defined!")
 

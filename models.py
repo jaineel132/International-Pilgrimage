@@ -25,8 +25,9 @@ class Pilgrimage(db.Model):
     duration = db.Column(db.String(50))
     best_time = db.Column(db.String(100))
     image_url = db.Column(db.String(200))
-    bookings = db.relationship('Booking', backref='pilgrimage', lazy='dynamic')
-    trip_plans = db.relationship('TripPlan', backref='pilgrimage', lazy='dynamic')
+    # Relationships
+    bookings = db.relationship('Booking', back_populates='pilgrimage')
+    trip_plans = db.relationship('TripPlan', back_populates='pilgrimage')
 
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +36,9 @@ class Booking(db.Model):
     travel_date = db.Column(db.Date, nullable=False)
     special_requirements = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship to Pilgrimage
+    pilgrimage = db.relationship('Pilgrimage', back_populates='bookings')
 
 class TripPlan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,5 +51,7 @@ class TripPlan(db.Model):
     transportation = db.Column(db.String(20), nullable=False)
     additional_notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    
+    # Relationship to Pilgrimage
+    pilgrimage = db.relationship('Pilgrimage', back_populates='trip_plans')
 print("Models have been defined")
