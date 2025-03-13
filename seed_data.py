@@ -13,7 +13,7 @@ def seed_pilgrimages():
     'description': 'The endpoint of the Camino de Santiago, a famous Christian pilgrimage route to the shrine of St. James.',
     'duration': '1-4 weeks (depending on the route)',
     'best_time': 'Spring or Fall',
-    'image_url': '/static/images/istockphoto-1002159204-1024x1024.jpg'
+    'image_url': '/static/images/santiago.jpg'
 },
 {
     'name': 'Mecca',
@@ -241,7 +241,7 @@ def seed_pilgrimages():
     db.session.commit()
     print("Database has been refreshed with pilgrimage data.")
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     app = create_app()
     with app.app_context():
         seed_pilgrimages()
