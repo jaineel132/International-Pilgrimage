@@ -120,8 +120,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create an image element
     const chatImage = document.createElement("img");
-    chatImage.src = "/static/images/chat-icon.png"; // Ensure the correct path
+    chatImage.src = "/static/images/mecca.jpg"; // Ensure the correct path
     chatImage.alt = "Chat AI";
+    chatImage.style.width = "50px";
+    chatImage.style.height = "50px";
 
     // Append image to the button
     chatButton.appendChild(chatImage);
