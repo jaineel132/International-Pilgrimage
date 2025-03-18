@@ -798,7 +798,7 @@ textarea.form-control {
   right: 20px;
   width: 50px;
   height: 50px;
-  background-color: #ff6600;
+  background-color: #0095ff;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -818,7 +818,7 @@ textarea.form-control {
   bottom: 80px;
   right: 20px;
   width: 30vw;
-  height: 50vh;
+  height: 70vh;
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -826,6 +826,12 @@ textarea.form-control {
   flex-direction: column;
   padding: 10px;
   display: none; /* Initially hidden */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+   background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Show chat window when active */
@@ -835,4 +841,89 @@ textarea.form-control {
 
 #chat-container:not(.hidden) {
   display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Chatbox Styling */
+#chatbox {
+  flex-grow: 1; /* Allow chatbox to grow */
+  overflow-y: auto; /* Enables scrolling */
+  max-height: 80%; /* Ensures it doesn't exceed the container height */
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+#chatbox p {
+  margin: 5px 0;
+  padding: 8px;
+  background: #f1f1f1;
+  border-radius: 5px;
+  text-align: left; /* Ensure text inside messages is left-aligned */
+  align-self: flex-start; /* Aligns messages to the left */
+  max-width: 80%; /* Prevents messages from stretching too wide */
+}
+/* Input and Button Styling */
+#userInput {
+  width: calc(100% - 60px); /* Adjust width */
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+#sendBtn {
+  width: 50px;
+  padding: 5px;
+  background: #0095ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+#chatbot-btn:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Make chatbot button bounce every 5 seconds */
+#chatbot-btn {
+  animation: bounce 5s infinite;
+}
+/* smooth scroll */
+#chatbox {
+  scroll-behavior: smooth;
+}
+
+
+
+
+
+
+/* Typing Indicator */
+.typing-dots {
+  display: inline-block;
+  width: 30px;
+  text-align: center;
+}
+
+.typing-dots::after {
+  content: "• • •";
+  font-size: 20px;
+  letter-spacing: 2px;
+  animation: typingAnimation 1.5s infinite;
+}
+
+/* Keyframes for dot animation */
+@keyframes typingAnimation {
+  0% { content: "•    "; }
+  33% { content: "• •  "; }
+  /* 66% { content: "• • •"; } */
 }

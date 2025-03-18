@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const chatbotBtn = document.createElement("button");
     chatbotBtn.id = "chatbot-btn";
-    chatbotBtn.innerText = "💬 Chat with AI";
+    chatbotBtn.innerText = "Chat with AI";
     document.body.appendChild(chatbotBtn);
 
     chatbotBtn.addEventListener("click", () =>
@@ -185,6 +185,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     chatbox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
     userInputField.value = "";
+    //Typing indicator
+    const typingIndicator = document.createElement("div");
+    typingIndicator.id = "typing-indicator";
+    typingIndicator.innerHTML = `
+    <p><strong>Blinky:</strong> <span class="typing-dots"></span></p>
+  `;
+    chatbox.appendChild(typingIndicator);
+
+    setTimeout(() => {
+    chatbox.scrollTop = chatbox.scrollHeight; // Auto-scroll to bottom
+  }, 100);
 
     try {
       const response = await fetch(apiUrl, {
@@ -229,10 +240,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.candidates && data.candidates.length > 0) {
         botReply = data.candidates[0]?.content?.parts?.[0]?.text || botReply;
       }
+      //remove typing indicator
+      typingIndicator.remove();
 
-      chatbox.innerHTML += `<p><strong>TravelPal:</strong> ${botReply}</p>`;
+      chatbox.innerHTML += `<p><strong>Blinky:</strong> ${botReply}</p>`;
     } catch (error) {
       console.error("🔥 Chatbot API Error:", error);
+
+      // Remove typing indicator and show error message
+      typingIndicator.remove();
+      
       chatbox.innerHTML += `<p><strong>Bot:</strong> Error fetching response. Please try again.</p>`;
     }
 
