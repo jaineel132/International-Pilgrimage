@@ -1,40 +1,129 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Plan Your Pilgrimage Trip</h1>
+<div class="trip-planning-section">
+    <h1 class="mb-4 text-center">Plan Your Pilgrimage Trip</h1>
     <form method="POST" action="{{ url_for('main.plan_trip') }}">
         {{ form.hidden_tag() }}
-        <div class="mb-3">
-            {{ form.pilgrimage.label(class="form-label") }}
-            {{ form.pilgrimage(class="form-select") }}
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Destination</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.pilgrimage.label(class="form-label") }}
+                            {{ form.pilgrimage(class="form-select") }}
+                            {% for error in form.pilgrimage.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            {{ form.start_date.label(class="form-label") }}
-            {{ form.start_date(class="form-control", type="date") }}
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Travel Dates</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.start_date.label(class="form-label") }}
+                            {{ form.start_date(class="form-control", type="date") }}
+                            {% for error in form.start_date.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.end_date.label(class="form-label") }}
+                            {{ form.end_date(class="form-control", type="date") }}
+                            {% for error in form.end_date.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Travelers</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.num_travelers.label(class="form-label") }}
+                            {{ form.num_travelers(class="form-control", type="number", min="1", max="20") }}
+                            {% for error in form.num_travelers.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.meal_preference.label(class="form-label") }}
+                            {{ form.meal_preference(class="form-select") }}
+                            {% for error in form.meal_preference.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            {{ form.end_date.label(class="form-label") }}
-            {{ form.end_date(class="form-control", type="date") }}
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Accommodation & Transportation</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.accommodation_type.label(class="form-label") }}
+                            {{ form.accommodation_type(class="form-select") }}
+                            {% for error in form.accommodation_type.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.transportation.label(class="form-label") }}
+                            {{ form.transportation(class="form-select") }}
+                            {% for error in form.transportation.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3 form-check">
+                            {{ form.guide_required(class="form-check-input") }}
+                            {{ form.guide_required.label(class="form-check-label") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Additional Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {{ form.additional_notes.label(class="form-label") }}
+                            {{ form.additional_notes(class="form-control", rows="5") }}
+                            {% for error in form.additional_notes.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            {{ form.num_travelers.label(class="form-label") }}
-            {{ form.num_travelers(class="form-control", type="number") }}
-        </div>
-        <div class="mb-3">
-            {{ form.accommodation_type.label(class="form-label") }}
-            {{ form.accommodation_type(class="form-select") }}
-        </div>
-        <div class="mb-3">
-            {{ form.transportation.label(class="form-label") }}
-            {{ form.transportation(class="form-select") }}
-        </div>
-        <div class="mb-3">
-            {{ form.additional_notes.label(class="form-label") }}
-            {{ form.additional_notes(class="form-control") }}
-        </div>
-        <div class="mb-3">
-            {{ form.submit(class="btn btn-primary") }}
+        
+        <div class="d-grid gap-2">
+            {{ form.submit(class="btn btn-primary btn-lg") }}
         </div>
     </form>
 </div>

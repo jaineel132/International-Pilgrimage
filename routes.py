@@ -1,11 +1,156 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for, current_app, abort
 from flask_login import login_required, current_user
 from models import Pilgrimage, Booking, TripPlan, Review, User
 from forms import BookingForm, TripPlanningForm, ProfileForm, ReviewForm
-from extensions import db
+from extensions import db, mail
 from datetime import datetime
+import os
+import uuid
+from werkzeug.utils import secure_filename
+from flask_mail import Message
+import random
+import string
 
 main = Blueprint('main', __name__)
+
+def generate_confirmation_code():
+    """Generate a random confirmation code for trip plans"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+def calculate_trip_price(pilgrimage, num_travelers, accommodation_type, transportation, guide_required):
+    """Calculate the total price of a trip based on various factors"""
+    # Base price from pilgrimage
+    base_price = pilgrimage.price or 100.0  # Default to 100 if no price set
+    
+    # Accommodation multiplier
+    accommodation_multipliers = {
+        'budget': 1.0,
+        'standard': 1.5,
+        'luxury': 2.5
+    }
+    
+    # Transportation multiplier
+    transportation_multipliers = {
+        'public': 1.0,
+        'private': 1.8,
+        'guided_tour': 2.2
+    }
+    
+    # Guide fee
+    guide_fee = 50.0 if guide_required else 0.0
+    
+    # Calculate total
+    total = (base_price * num_travelers * 
+             accommodation_multipliers.get(accommodation_type, 1.0) * 
+             transportation_multipliers.get(transportation, 1.0) + 
+             guide_fee)
+    
+    return round(total, 2)
+
+def send_trip_confirmation_email(user, trip_plan, pilgrimage):
+    """Send a confirmation email with trip details"""
+    msg = Message(
+        subject="Your Sacred Journey Trip Confirmation",
+        recipients=[user.email]
+    )
+    
+    # Format dates
+    start_date = trip_plan.start_date.strftime('%B %d, %Y')
+    end_date = trip_plan.end_date.strftime('%B %d, %Y')
+    
+    # Create email body
+    msg.html = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background-color: #1a233e; color: white; padding: 10px 20px; text-align: center; }}
+            .content {{ padding: 20px; border: 1px solid #ddd; }}
+            .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #777; }}
+            .details {{ margin: 20px 0; }}
+            .details table {{ width: 100%; border-collapse: collapse; }}
+            .details table td, .details table th {{ padding: 8px; border-bottom: 1px solid #ddd; }}
+            .price {{ font-size: 24px; font-weight: bold; color: #1a233e; text-align: right; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Sacred Journeys</h1>
+            </div>
+            <div class="content">
+                <h2>Trip Confirmation</h2>
+                <p>Dear {user.full_name or user.username},</p>
+                <p>Thank you for planning your pilgrimage with Sacred Journeys. Your trip has been confirmed!</p>
+                
+                <div class="details">
+                    <h3>Trip Details</h3>
+                    <table>
+                        <tr>
+                            <th align="left">Confirmation Code:</th>
+                            <td>{trip_plan.confirmation_code}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Pilgrimage:</th>
+                            <td>{pilgrimage.name}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Location:</th>
+                            <td>{pilgrimage.location}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Dates:</th>
+                            <td>{start_date} to {end_date}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Travelers:</th>
+                            <td>{trip_plan.num_travelers}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Accommodation:</th>
+                            <td>{trip_plan.accommodation_type.capitalize()}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Transportation:</th>
+                            <td>{trip_plan.transportation.replace('_', ' ').capitalize()}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Meal Preference:</th>
+                            <td>{trip_plan.meal_preference.replace('_', ' ').capitalize()}</td>
+                        </tr>
+                        <tr>
+                            <th align="left">Guide:</th>
+                            <td>{'Yes' if trip_plan.guide_required else 'No'}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="price">
+                    Total: ${trip_plan.total_price}
+                </div>
+                
+                <p>Please keep this confirmation for your records. You can also view your trip details in your dashboard.</p>
+                
+                <p>We look forward to helping you on your sacred journey!</p>
+                
+                <p>Best regards,<br>The Sacred Journeys Team</p>
+            </div>
+            <div class="footer">
+                <p>© 2024 Sacred Journeys Explorer. All rights reserved.</p>
+                <p>If you have any questions, please contact us at support@sacredjourneys.com</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    try:
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        return False
 
 @main.route('/')
 def index():
@@ -30,24 +175,8 @@ def pilgrimage(id):
 @login_required
 def book_pilgrimage(pilgrimage_id):
     pilgrimage = Pilgrimage.query.get_or_404(pilgrimage_id)
-    form = BookingForm()
-    if form.validate_on_submit():
-        booking = Booking(
-            user_id=current_user.id,
-            pilgrimage_id=pilgrimage.id,
-            travel_date=form.travel_date.data,
-            special_requirements=form.special_requirements.data
-        )
-        db.session.add(booking)
-        db.session.commit()
-        flash('Your pilgrimage has been booked successfully!', 'success')
-        return redirect(url_for('main.dashboard'))
-    
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(f"{getattr(form, field).label.text}: {error}", "danger")
-    
-    return render_template('pilgrimage.html', pilgrimage=pilgrimage, form=form)
+    # Redirect to trip planning with the pilgrimage pre-selected
+    return redirect(url_for('main.plan_trip', pilgrimage_id=pilgrimage_id))
 
 @main.route('/api/search')
 def search():
@@ -59,7 +188,9 @@ def search():
         'id': p.id,
         'name': p.name,
         'location': p.location,
-        'image_url': p.image_url
+        'image_url': p.image_url,
+        'average_rating': p.average_rating,
+        'reviews_count': p.reviews.count()
     } for p in pilgrimages])
 
 @main.route('/dashboard')
@@ -70,13 +201,46 @@ def dashboard():
     now = datetime.now().date()
     return render_template('dashboard.html', bookings=user_bookings, trip_plans=user_trip_plans, now=now)
 
+@main.route('/trip_details/<int:trip_id>')
+@login_required
+def trip_details(trip_id):
+    trip = TripPlan.query.get_or_404(trip_id)
+    # Ensure the trip belongs to the current user
+    if trip.user_id != current_user.id:
+        abort(403)
+    return render_template('trip_details.html', trip=trip)
+
 @main.route('/plan_trip', methods=['GET', 'POST'])
 @login_required
 def plan_trip():
     form = TripPlanningForm()
-    form.pilgrimage.choices = [(str(p.id), p.name) for p in Pilgrimage.query.all()]
+    
+    # Get all pilgrimages for the dropdown
+    pilgrimages = Pilgrimage.query.all()
+    form.pilgrimage.choices = [(str(p.id), p.name) for p in pilgrimages]
+    
+    # Pre-select pilgrimage if provided in URL
+    pilgrimage_id = request.args.get('pilgrimage_id')
+    if pilgrimage_id and request.method == 'GET':
+        form.pilgrimage.data = pilgrimage_id
     
     if form.validate_on_submit():
+        # Get the selected pilgrimage
+        pilgrimage = Pilgrimage.query.get(int(form.pilgrimage.data))
+        
+        # Generate confirmation code
+        confirmation_code = generate_confirmation_code()
+        
+        # Calculate total price
+        total_price = calculate_trip_price(
+            pilgrimage,
+            form.num_travelers.data,
+            form.accommodation_type.data,
+            form.transportation.data,
+            form.guide_required.data
+        )
+        
+        # Create trip plan
         trip_plan = TripPlan(
             user_id=current_user.id,
             pilgrimage_id=int(form.pilgrimage.data),
@@ -85,12 +249,22 @@ def plan_trip():
             num_travelers=form.num_travelers.data,
             accommodation_type=form.accommodation_type.data,
             transportation=form.transportation.data,
-            additional_notes=form.additional_notes.data
+            meal_preference=form.meal_preference.data,
+            guide_required=form.guide_required.data,
+            additional_notes=form.additional_notes.data,
+            confirmation_code=confirmation_code,
+            total_price=total_price,
+            payment_status='confirmed'  # For simplicity, we'll mark it as confirmed
         )
+        
         db.session.add(trip_plan)
         db.session.commit()
-        flash('Your trip has been planned successfully!', 'success')
-        return redirect(url_for('main.dashboard'))
+        
+        # Send confirmation email
+        send_trip_confirmation_email(current_user, trip_plan, pilgrimage)
+        
+        flash('Your trip has been planned successfully! A confirmation has been sent to your email.', 'success')
+        return redirect(url_for('main.trip_details', trip_id=trip_plan.id))
     
     for field, errors in form.errors.items():
         for error in errors:
@@ -107,6 +281,19 @@ def profile():
         current_user.email = form.email.data
         current_user.bio = form.bio.data
         current_user.preferences = form.preferences.data
+        
+        # Handle profile picture upload
+        if form.profile_picture.data:
+            filename = secure_filename(form.profile_picture.data.filename)
+            # Create a unique filename
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            # Save the file
+            file_path = os.path.join(current_app.root_path, 'static', 'uploads', unique_filename)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            form.profile_picture.data.save(file_path)
+            # Update the user's profile picture
+            current_user.profile_picture = f"/static/uploads/{unique_filename}"
+        
         db.session.commit()
         flash('Your profile has been updated!', 'success')
         return redirect(url_for('main.profile'))

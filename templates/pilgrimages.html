@@ -1,20 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-center mb-4">Explore Pilgrimages</h1>
+<h1 class="text-center mb-2">Explore Pilgrimages</h1>
+<p class="text-center mb-4">Discover sacred destinations from around the world</p>
 
 <div class="mb-4">
-    <input type="text" id="search" class="form-control" placeholder="Search pilgrimages...">
+    <input type="text" id="search" class="form-control" placeholder="Search pilgrimages by name or location...">
 </div>
 
-<div id="pilgrimages-container" class="row row-cols-1 row-cols-md-3 g-4">
+<div id="pilgrimages-container" class="row animated-fade-in">
     {% for pilgrimage in pilgrimages.items %}
-    <div class="col">
+    <div class="col-md-4 mb-4" style="animation-delay: {{ loop.index * 0.1 }}s">
         <div class="card h-100">
-            <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" class="card-img-top" alt="{{ pilgrimage.name }}">
+            <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" 
+                 class="card-img-top" 
+                 alt="{{ pilgrimage.name }}"
+                 onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
             <div class="card-body">
                 <h5 class="card-title">{{ pilgrimage.name }}</h5>
                 <p class="card-text">{{ pilgrimage.location }}</p>
+                <div class="mb-3">
+                    {% for i in range(pilgrimage.average_rating|int) %}
+                    <span class="text-warning">★</span>
+                    {% endfor %}
+                    {% for i in range(5 - pilgrimage.average_rating|int) %}
+                    <span class="text-muted">★</span>
+                    {% endfor %}
+                    <span class="text-muted">({{ pilgrimage.reviews.count() }})</span>
+                </div>
                 <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn btn-primary">Learn More</a>
             </div>
         </div>
@@ -69,12 +82,13 @@
                 pilgrimagesContainer.innerHTML = '<p class="text-center w-100">No pilgrimages found.</p>';
                 return;
             }
-            pilgrimages.forEach(pilgrimage => {
+            pilgrimages.forEach((pilgrimage, index) => {
                 const card = document.createElement('div');
-                card.className = 'col';
+                card.className = 'col-md-4 mb-4 animated-fade-in';
+                card.style.animationDelay = `${index * 0.1}s`;
                 card.innerHTML = `
                     <div class="card h-100">
-                        <img src="${pilgrimage.image_url || '/static/images/placeholder.jpg'}" class="card-img-top" alt="${pilgrimage.name}">
+                        <img src="${pilgrimage.image_url || '/static/images/placeholder.jpg'}" class="card-img-top" alt="${pilgrimage.name}" onerror="this.src='/static/images/placeholder.jpg'">
                         <div class="card-body">
                             <h5 class="card-title">${pilgrimage.name}</h5>
                             <p class="card-text">${pilgrimage.location}</p>
