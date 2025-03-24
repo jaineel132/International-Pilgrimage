@@ -24,10 +24,10 @@
         {% for pilgrimage in featured_pilgrimages %}
         <div class="col-md-4 mb-4 animated-fade-in" style="animation-delay: {{ loop.index * 0.1 }}s">
             <div class="card h-100">
-                <img src="{{ pilgrimage.image_url or url_for('static', filename='images/placeholder.jpg') }}" 
+                <img src="{{ pilgrimage.image_url if pilgrimage.image_url else url_for('static', filename='images/default-placeholder.jpg') }}" 
                      class="card-img-top" 
                      alt="{{ pilgrimage.name }}"
-                     onerror="this.src='{{ url_for('static',filename='images/placeholder.jpg') }}'">
+                     onerror="this.src='{{ url_for('static',filename='images/default-placeholder.jpg') }}'">
                 <div class="card-body">
                     <h5 class="card-title">{{ pilgrimage.name }}</h5>
                     <p class="card-text">{{ pilgrimage.location }}</p>
@@ -77,4 +77,3 @@
     </div>
 </div>
 {% endblock %}
-
