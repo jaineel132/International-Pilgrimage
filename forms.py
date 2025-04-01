@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, TextAreaField, SelectField, IntegerField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, NumberRange, Length
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, TextAreaField, SelectField, IntegerField, FileField
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, NumberRange, Length, Regexp
 from models import User
+from flask_wtf.file import FileAllowed
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -10,10 +11,45 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    username = StringField('Username', validators=[
+        DataRequired(),
+        Length(min=4, max=20, message="Username must be between 4 and 20 characters"),
+        Regexp('^[A-Za-z][A-Za-z0-9_.]*$', message="Username can only contain letters, numbers, dots or underscores")
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(), 
+        Email(message="Please enter a valid email address")
+    ])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=8, message="Password must be at least 8 characters long"),
+        Regexp('(?=.*\d)(?=.*[a-z])(?=.*[A-Z])', message="Password must include at least one uppercase letter, one lowercase letter, and one number")
+    ])
+    password2 = PasswordField('Repeat Password', validators=[
+        DataRequired(), 
+        EqualTo('password', message="Passwords must match")
+    ])
+    full_name = StringField('Full Name', validators=[DataRequired()])
+    country = SelectField('Country', choices=[
+        ('', 'Select your country'),
+        ('usa', 'United States'),
+        ('uk', 'United Kingdom'),
+        ('canada', 'Canada'),
+        ('australia', 'Australia'),
+        ('india', 'India'),
+        ('france', 'France'),
+        ('germany', 'Germany'),
+        ('italy', 'Italy'),
+        ('spain', 'Spain'),
+        ('japan', 'Japan'),
+        ('other', 'Other')
+    ], validators=[DataRequired()])
+    profile_picture = FileField('Profile Picture (Optional)', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
+    ])
+    terms_agree = BooleanField('I agree to the Terms and Conditions', validators=[
+        DataRequired(message="You must agree to the terms and conditions")
+    ])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -46,6 +82,13 @@ class TripPlanningForm(FlaskForm):
         ('private', 'Private Vehicle'),
         ('guided_tour', 'Guided Tour')
     ], validators=[DataRequired()])
+    meal_preference = SelectField('Meal Preference', choices=[
+        ('vegetarian', 'Vegetarian'),
+        ('vegan', 'Vegan'),
+        ('non_vegetarian', 'Non-Vegetarian'),
+        ('no_preference', 'No Preference')
+    ])
+    guide_required = BooleanField('Require a Guide')
     additional_notes = TextAreaField('Additional Notes')
     submit = SubmitField('Plan My Trip')
 
@@ -58,6 +101,9 @@ class ProfileForm(FlaskForm):
         ('historical', 'Historical Sites'),
         ('cultural', 'Cultural Experiences'),
         ('all', 'All Types')
+    ])
+    profile_picture = FileField('Update Profile Picture', validators=[
+        FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')
     ])
     submit = SubmitField('Update Profile')
 
@@ -83,3 +129,22 @@ class ReviewForm(FlaskForm):
     comment = TextAreaField('Comment', validators=[DataRequired(), Length(min=10, max=500)])
     submit = SubmitField('Submit Review')
 
+class ForumPostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    category = SelectField('Category', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Post')
+
+
+class ForumCommentForm(FlaskForm):
+    content = TextAreaField('Comment', validators=[DataRequired(), Length(min=1, max=500)])
+    submit = SubmitField('Comment')
+
+
+class TravelLogForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    content = TextAreaField('Log Content', validators=[DataRequired()])
+    location = StringField('Location', validators=[Length(max=100)])
+    is_public = BooleanField('Make this travel log public')
+    images = FileField('Upload Images', validators=[FileAllowed(['jpg', 'jpeg', 'png'], 'Only images are allowed')])
+    submit = SubmitField('Submit')

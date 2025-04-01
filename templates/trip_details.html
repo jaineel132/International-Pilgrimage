@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="trip-details-container animated-fade-in">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="h3 mb-0">Trip Details</h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="confirmation-header">
+                        <h2>{{ trip.pilgrimage.name }}</h2>
+                        <span class="badge bg-success">Confirmed</span>
+                        <p class="text-muted">Confirmation Code: {{ trip.confirmation_code }}</p>
+                    </div>
+                    
+                    <div class="trip-info mt-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3 class="h5">Trip Information</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Location:</span>
+                                        <span class="fw-bold">{{ trip.pilgrimage.location }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Start Date:</span>
+                                        <span class="fw-bold">{{ trip.start_date.strftime('%B %d, %Y') }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>End Date:</span>
+                                        <span class="fw-bold">{{ trip.end_date.strftime('%B %d, %Y') }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Duration:</span>
+                                        <span class="fw-bold">{{ (trip.end_date - trip.start_date).days }} days</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Number of Travelers:</span>
+                                        <span class="fw-bold">{{ trip.num_travelers }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h3 class="h5">Accommodation & Services</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Accommodation:</span>
+                                        <span class="fw-bold">{{ trip.accommodation_type|capitalize }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Transportation:</span>
+                                        <span class="fw-bold">{{ trip.transportation|replace('_', ' ')|capitalize }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Meal Preference:</span>
+                                        <span class="fw-bold">{{ trip.meal_preference|replace('_', ' ')|capitalize }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Guide:</span>
+                                        <span class="fw-bold">{{ 'Yes' if trip.guide_required else 'No' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Payment Status:</span>
+                                        <span class="fw-bold text-success">{{ trip.payment_status|capitalize }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if trip.additional_notes %}
+                    <div class="additional-notes mt-4">
+                        <h3 class="h5">Additional Notes</h3>
+                        <div class="card">
+                            <div class="card-body">
+                                {{ trip.additional_notes }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="price-summary card">
+                        <div class="card-header bg-light">
+                            <h3 class="h5 mb-0">Price Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Base Price:</span>
+                                    <span>₹{{ (trip.total_price / trip.num_travelers)|round(2) }} per person</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Number of Travelers:</span>
+                                    <span>{{ trip.num_travelers }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Accommodation:</span>
+                                    <span>{{ trip.accommodation_type|capitalize }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Transportation:</span>
+                                    <span>{{ trip.transportation|replace('_', ' ')|capitalize }}</span>
+                                </li>
+                                {% if trip.guide_required %}
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Guide Service:</span>
+                                    <span>Included</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 mb-0">Total:</span>
+                                <span class="h3 mb-0 text-primary">₹{{ trip.total_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions mt-4">
+                        <a href="{{ url_for('main.pilgrimage', id=trip.pilgrimage.id) }}" class="btn btn-outline-primary d-block mb-2">View Pilgrimage</a>
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary d-block">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

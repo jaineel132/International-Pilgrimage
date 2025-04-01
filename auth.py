@@ -4,6 +4,10 @@ from flask_login import login_user, logout_user, current_user
 from extensions import db
 from models import User
 from forms import LoginForm, RegistrationForm
+from werkzeug.utils import secure_filename
+import os
+import uuid
+from flask import current_app
 
 auth = Blueprint('auth', __name__)
 
@@ -40,8 +44,26 @@ def register():
         return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(
+            username=form.username.data, 
+            email=form.email.data,
+            full_name=form.full_name.data,
+            country=form.country.data
+        )
         user.set_password(form.password.data)
+        
+        # Handle profile picture upload
+        if form.profile_picture.data:
+            filename = secure_filename(form.profile_picture.data.filename)
+            # Create a unique filename
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            # Save the file
+            file_path = os.path.join(current_app.root_path, 'static', 'uploads', unique_filename)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            form.profile_picture.data.save(file_path)
+            # Update the user's profile picture
+            user.profile_picture = f"/static/uploads/{unique_filename}"
+        
         db.session.add(user)
         db.session.commit()
         flash('Congratulations, you are now a registered user!', 'success')

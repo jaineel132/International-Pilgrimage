@@ -1,0 +1,643 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - Sacred Journeys{% endblock %}
+
+{% block extra_css %}
+<style>
+.payment-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.payment-summary {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.payment-form {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.payment-title {
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 20px;
+    color: #1a233e;
+}
+
+.card-element {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+.payment-btn {
+    background: linear-gradient(45deg, #1a233e, #3b4465);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.payment-btn:hover {
+    background: linear-gradient(45deg, #3b4465, #1a233e);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+.payment-errors {
+    color: #dc3545;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.secure-badge i {
+    margin-right: 5px;
+    color: #28a745;
+}
+
+.payment-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.payment-method {
+    flex: 1;
+    min-width: 120px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-method:hover {
+    border-color: #aaa;
+    background-color: #f9f9f9;
+}
+
+.payment-method.active {
+    border-color: #1a233e;
+    background-color: rgba(26, 35, 62, 0.05);
+}
+
+.payment-method i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.payment-method-content {
+    display: none;
+}
+
+.payment-method-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.payment-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #6c757d;
+}
+
+.payment-divider::before,
+.payment-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.payment-divider span {
+    padding: 0 10px;
+}
+
+.dark .payment-summary {
+    background-color: #2a2a2a;
+}
+
+.dark .payment-form {
+    background-color: #1e1e1e;
+}
+
+.dark .payment-method {
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.dark .payment-method:hover {
+    background-color: #2a2a2a;
+    border-color: #666;
+}
+
+.dark .payment-method.active {
+    border-color: var(--secondary-color);
+    background-color: rgba(255, 215, 0, 0.1);
+}
+
+.dark .payment-divider {
+    color: #aaa;
+}
+
+.dark .payment-divider::before,
+.dark .payment-divider::after {
+    border-color: #444;
+}
+
+.price-breakdown {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.price-breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.price-breakdown-item:last-child {
+    border-bottom: none;
+}
+
+.price-breakdown-total {
+    font-weight: bold;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #ddd;
+}
+
+.test-account-section {
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.dark .test-account-section {
+    background-color: #332d00;
+    border-color: #665600;
+}
+
+.dark .price-breakdown {
+    background-color: #2a2a2a;
+}
+
+.dark .price-breakdown-item {
+    border-bottom-color: #444;
+}
+
+.dark .price-breakdown-total {
+    border-top-color: #444;
+}
+</style>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block content %}
+<div class="payment-container animated-fade-in">
+<h1 class="payment-title text-center">Complete Your Booking</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="payment-summary">
+            <h2 class="h4 mb-4">Trip Summary</h2>
+            
+            <div class="d-flex align-items-center mb-4">
+                <img src="{{ trip.pilgrimage.image_url }}" alt="{{ trip.pilgrimage.name }}" class="img-fluid rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                <div class="ms-3">
+                    <h3 class="h5 mb-1">{{ trip.pilgrimage.name }}</h3>
+                    <p class="text-muted mb-0">{{ trip.pilgrimage.location }}</p>
+                </div>
+            </div>
+            
+            <div class="trip-details">
+                <div class="row mb-2">
+                    <div class="col-6 text-muted">Dates:</div>
+                    <div class="col-6 text-end">{{ trip.start_date.strftime('%b %d') }} - {{ trip.end_date.strftime('%b %d, %Y') }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6 text-muted">Duration:</div>
+                    <div class="col-6 text-end">{{ (trip.end_date - trip.start_date).days }} days</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6 text-muted">Travelers:</div>
+                    <div class="col-6 text-end">{{ trip.num_travelers }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6 text-muted">Accommodation:</div>
+                    <div class="col-6 text-end">{{ trip.accommodation_type|capitalize }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6 text-muted">Transportation:</div>
+                    <div class="col-6 text-end">{{ trip.transportation|replace('_', ' ')|capitalize }}</div>
+                </div>
+                {% if trip.guide_required %}
+                <div class="row mb-2">
+                    <div class="col-6 text-muted">Guide:</div>
+                    <div class="col-6 text-end">Included</div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="price-breakdown">
+                <h4 class="h5 mb-3">Price Breakdown</h4>
+                
+                <div class="price-breakdown-item">
+                    <span>Base Price:</span>
+                    <span>₹{{ trip.base_price }} × {{ trip.num_travelers }} travelers</span>
+                </div>
+                
+                {% if trip.accommodation_fee > 0 %}
+                <div class="price-breakdown-item">
+                    <span>Accommodation ({{ trip.accommodation_type|capitalize }}):</span>
+                    <span>₹{{ trip.accommodation_fee|round(2) }}</span>
+                </div>
+                {% endif %}
+                
+                {% if trip.transportation_fee > 0 %}
+                <div class="price-breakdown-item">
+                    <span>Transportation ({{ trip.transportation|replace('_', ' ')|capitalize }}):</span>
+                    <span>₹{{ trip.transportation_fee|round(2) }}</span>
+                </div>
+                {% endif %}
+                
+                {% if trip.guide_fee > 0 %}
+                <div class="price-breakdown-item">
+                    <span>Guide Service:</span>
+                    <span>₹{{ trip.guide_fee|round(2) }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="price-breakdown-item">
+                    <span>Tax (8.5%):</span>
+                    <span>₹{{ trip.tax_amount|round(2) }}</span>
+                </div>
+                
+                {% if trip.discount_amount > 0 %}
+                <div class="price-breakdown-item">
+                    <span>Discount (Group of {{ trip.num_travelers }}):</span>
+                    <span>-₹{{ trip.discount_amount|round(2) }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="price-breakdown-total">
+                    <span>Total:</span>
+                    <span>₹{{ trip.total_price }}</span>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="payment-form">
+            <h2 class="h4 mb-4">Payment Details</h2>
+            
+            <div class="test-account-section mb-4">
+                <h5 class="mb-2">Test Accounts</h5>
+                <p class="small mb-2">Use these test accounts to simulate payments:</p>
+                <div class="mb-3">
+                    <select class="form-select" id="testAccountSelect">
+                        <option value="">Select a test account</option>
+                        {% for email in dummy_accounts %}
+                        <option value="{{ email }}">{{ email }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="testAccountDetails" class="small" style="display: none;">
+                    <p class="mb-1"><strong>Card Number:</strong> <span id="testCardNumber"></span></p>
+                    <p class="mb-1"><strong>Expiry:</strong> <span id="testExpiry"></span></p>
+                    <p class="mb-1"><strong>CVV:</strong> <span id="testCVV"></span></p>
+                    <p class="mb-1"><strong>Name:</strong> <span id="testName"></span></p>
+                    <p class="mb-1"><strong>Balance:</strong> ₹<span id="testBalance"></span></p>
+                </div>
+            </div>
+            
+            <div class="payment-methods">
+                <div class="payment-method active" data-method="card">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Credit Card</span>
+                </div>
+                <div class="payment-method" data-method="upi">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>UPI</span>
+                </div>
+                <div class="payment-method" data-method="netbanking">
+                    <i class="fas fa-university"></i>
+                    <span>Net Banking</span>
+                </div>
+                <div class="payment-method" data-method="wallet">
+                    <i class="fas fa-wallet"></i>
+                    <span>Wallet</span>
+                </div>
+            </div>
+            
+            <div id="payment-form">
+                <!-- Credit Card Form -->
+                <div class="payment-method-content active" id="card-method">
+                    <div class="mb-3">
+                        <label for="card-holder-name" class="form-label">Cardholder Name</label>
+                        <input type="text" id="card-holder-name" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="card-number" class="form-label">Card Number</label>
+                        <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="card-expiry" class="form-label">Expiration Date</label>
+                            <input type="text" id="card-expiry" class="form-control" placeholder="MM/YY" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="card-cvc" class="form-label">CVV</label>
+                            <input type="text" id="card-cvc" class="form-control" placeholder="123" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- UPI Form -->
+                <div class="payment-method-content" id="upi-method">
+                    <div class="text-center py-4">
+                        <i class="fas fa-mobile-alt fa-3x mb-3 text-primary"></i>
+                        <p>Enter your UPI ID to make payment</p>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="yourname@upi" id="upi-id">
+                        </div>
+                        <p class="small text-muted">You will receive a payment request on your UPI app.</p>
+                    </div>
+                </div>
+                
+                <!-- Net Banking Form -->
+                <div class="payment-method-content" id="netbanking-method">
+                    <div class="mb-4">
+                        <label class="form-label">Select Your Bank</label>
+                        <select class="form-select mb-3">
+                            <option value="">Select Bank</option>
+                            <option value="sbi">State Bank of India</option>
+                            <option value="hdfc">HDFC Bank</option>
+                            <option value="icici">ICICI Bank</option>
+                            <option value="axis">Axis Bank</option>
+                            <option value="pnb">Punjab National Bank</option>
+                        </select>
+                        <p class="small text-muted">You will be redirected to your bank's website to complete the payment.</p>
+                    </div>
+                </div>
+                
+                <!-- Wallet Form -->
+                <div class="payment-method-content" id="wallet-method">
+                    <div class="text-center py-3">
+                        <i class="fas fa-wallet fa-3x mb-3 text-success"></i>
+                        <p>Select your preferred wallet:</p>
+                        <div class="d-flex justify-content-center gap-3 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="wallet" id="paytm" checked>
+                                <label class="form-check-label" for="paytm">Paytm</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="wallet" id="phonepe">
+                                <label class="form-check-label" for="phonepe">PhonePe</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="wallet" id="amazonpay">
+                                <label class="form-check-label" for="amazonpay">Amazon Pay</label>
+                            </div>
+                        </div>
+                        <p class="small text-muted">You will be redirected to complete the payment.</p>
+                    </div>
+                </div>
+                
+                <div id="card-errors" class="payment-errors" role="alert"></div>
+                
+                <button id="submit-payment" class="payment-btn">
+                    <span id="button-text">Pay ₹{{ trip.total_price }}</span>
+                    <span id="spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+                
+                <div class="secure-badge">
+                    <i class="fas fa-lock"></i> Secure payment
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="paymentConfirmModal" tabindex="-1" aria-labelledby="paymentConfirmModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="paymentConfirmModalLabel">Confirm Payment</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <p>You are about to make a payment of <strong>₹{{ trip.total_price }}</strong> for your trip to <strong>{{ trip.pilgrimage.name }}</strong>.</p>
+      <p>Please confirm that you want to proceed with this payment.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Test account functionality
+  const testAccountSelect = document.getElementById('testAccountSelect');
+  const testAccountDetails = document.getElementById('testAccountDetails');
+  const testCardNumber = document.getElementById('testCardNumber');
+  const testExpiry = document.getElementById('testExpiry');
+  const testCVV = document.getElementById('testCVV');
+  const testName = document.getElementById('testName');
+  const testBalance = document.getElementById('testBalance');
+  
+  // Test account data
+  const testAccounts = {
+      "test@example.com": {
+          "card_number": "4111111111111111",
+          "expiry": "12/25",
+          "cvv": "123",
+          "name": "Test User",
+          "balance": 50000.00
+      },
+      "demo@example.com": {
+          "card_number": "5555555555554444",
+          "expiry": "10/26",
+          "cvv": "321",
+          "name": "Demo User",
+          "balance": 100000.00
+      }
+  };
+  
+  // Handle test account selection
+  testAccountSelect.addEventListener('change', function() {
+      const selectedAccount = this.value;
+      
+      if (selectedAccount && testAccounts[selectedAccount]) {
+          const account = testAccounts[selectedAccount];
+          
+          // Fill in test account details
+          testCardNumber.textContent = account.card_number;
+          testExpiry.textContent = account.expiry;
+          testCVV.textContent = account.cvv;
+          testName.textContent = account.name;
+          testBalance.textContent = account.balance.toFixed(2);
+          
+          // Show test account details
+          testAccountDetails.style.display = 'block';
+          
+          // Auto-fill the payment form
+          document.getElementById('card-holder-name').value = account.name;
+          document.getElementById('card-number').value = account.card_number;
+          document.getElementById('card-expiry').value = account.expiry;
+          document.getElementById('card-cvc').value = account.cvv;
+      } else {
+          testAccountDetails.style.display = 'none';
+          
+          // Clear the payment form
+          document.getElementById('card-holder-name').value = '';
+          document.getElementById('card-number').value = '';
+          document.getElementById('card-expiry').value = '';
+          document.getElementById('card-cvc').value = '';
+      }
+  });
+  
+  // Payment method selection
+  const paymentMethods = document.querySelectorAll('.payment-method');
+  const paymentMethodContents = document.querySelectorAll('.payment-method-content');
+  const submitButton = document.getElementById('submit-payment');
+  const buttonText = document.getElementById('button-text');
+  const spinner = document.getElementById('spinner');
+  const errorElement = document.getElementById('card-errors');
+  
+  // Set active payment method
+  paymentMethods.forEach(method => {
+      method.addEventListener('click', function() {
+          // Remove active class from all methods
+          paymentMethods.forEach(m => m.classList.remove('active'));
+          paymentMethodContents.forEach(c => c.classList.remove('active'));
+          
+          // Add active class to selected method
+          this.classList.add('active');
+          const methodId = this.getAttribute('data-method');
+          document.getElementById(`${methodId}-method`).classList.add('active');
+          
+          // Update button text based on method
+          updateButtonText(methodId);
+      });
+  });
+  
+  function updateButtonText(methodId) {
+      switch(methodId) {
+          case 'upi':
+              buttonText.textContent = 'Pay with UPI';
+              break;
+          case 'netbanking':
+              buttonText.textContent = 'Pay with Net Banking';
+              break;
+          case 'wallet':
+              buttonText.textContent = 'Pay with Wallet';
+              break;
+          default:
+              buttonText.textContent = 'Pay ₹{{ trip.total_price }}';
+      }
+  }
+  
+  // Handle payment submission - SIMPLIFIED VERSION
+  submitButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      
+      // Disable the submit button to prevent repeated clicks
+      submitButton.disabled = true;
+      buttonText.textContent = 'Processing...';
+      spinner.classList.remove('d-none');
+      
+      // Get CSRF token from meta tag
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      
+      // Send payment to server - simplified
+      fetch('/process-payment/{{ trip.id }}', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+              method: 'card'
+          })
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (data.success) {
+              // Redirect to receipt page
+              window.location.href = data.redirect;
+          } else {
+              // Show error
+              errorElement.textContent = data.error || 'Payment failed. Please try again.';
+              submitButton.disabled = false;
+              buttonText.textContent = 'Pay ₹{{ trip.total_price }}';
+              spinner.classList.add('d-none');
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          errorElement.textContent = 'An unexpected error occurred. Please try again.';
+          submitButton.disabled = false;
+          buttonText.textContent = 'Pay ₹{{ trip.total_price }}';
+          spinner.classList.add('d-none');
+      });
+  });
+});
+</script>
+{% endblock %}
+

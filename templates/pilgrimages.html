@@ -15,7 +15,10 @@
             <div class="card-body">
                 <h5 class="card-title">{{ pilgrimage.name }}</h5>
                 <p class="card-text">{{ pilgrimage.location }}</p>
-                <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn btn-primary">Learn More</a>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="price-tag">₹{{ pilgrimage.price }}</span>
+                    <a href="{{ url_for('main.pilgrimage', id=pilgrimage.id) }}" class="btn btn-primary">Learn More</a>
+                </div>
             </div>
         </div>
     </div>
@@ -78,7 +81,10 @@
                         <div class="card-body">
                             <h5 class="card-title">${pilgrimage.name}</h5>
                             <p class="card-text">${pilgrimage.location}</p>
-                            <a href="/pilgrimage/${pilgrimage.id}" class="btn btn-primary">Learn More</a>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price-tag">₹${pilgrimage.price}</span>
+                                <a href="/pilgrimage/${pilgrimage.id}" class="btn btn-primary">Learn More</a>
+                            </div>
                         </div>
                     </div>
                 `;

@@ -1,0 +1,11 @@
+<!-- This is a partial template that can be included where needed -->
+{% if trip.payment_status == 'paid' %}
+<a href="{{ url_for('payment.receipt', trip_id=trip.id) }}" class="btn btn-success">
+    <i class="fas fa-receipt"></i> View Receipt
+</a>
+{% else %}
+<a href="{{ url_for('payment.checkout', trip_id=trip.id) }}" class="btn btn-primary">
+    <i class="fas fa-credit-card"></i> Pay Now
+</a>
+{% endif %}
+
