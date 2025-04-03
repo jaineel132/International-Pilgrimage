@@ -35,6 +35,7 @@ def calculate_trip_price(pilgrimage, num_travelers, accommodation_type, transpor
     total = subtotal + tax_amount - discount_amount
 
     return {
+        # 
         'base_price': base_price,
         'base_total': base_total,
         'accommodation_fee': accommodation_fee,
